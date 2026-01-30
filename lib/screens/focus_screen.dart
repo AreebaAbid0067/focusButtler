@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:productivity_app/utils/theme.dart';
 import 'package:productivity_app/widgets/focus_ritual_sheet.dart';
-
 import 'package:provider/provider.dart';
 import 'package:productivity_app/providers/focus_provider.dart';
 
@@ -22,7 +21,7 @@ class FocusScreen extends StatelessWidget {
               // Attention Meter (Cognitive Load)
               _buildAttentionMeter(context),
 
-              // Next Purposeful Task
+              // Next Purposeful Task (AI-Recommended)
               _buildTaskCard(context),
 
               // Start Focus Button (Breathing)
@@ -65,30 +64,30 @@ class FocusScreen extends StatelessWidget {
                             .headlineMedium
                             ?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: HyperfocusColors.purposeful,
+                          color: loadColor,
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),
                       ),
                       Text(
                         "REMAINING",
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: HyperfocusColors.purposeful
-                                  .withValues(alpha: 0.7),
+                              color: loadColor.withValues(alpha: 0.7),
                             ),
                       ),
                     ] else ...[
                       Text(
-                        "${(cognitiveLoad * 100).toInt()}%",
+                        "${(focusProvider.attentionScore * 100).toInt()}%",
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium
                             ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: loadColor,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: loadColor,
+                          fontFeatures: [const FontFeature.tabularFigures()],
+                        ),
                       ),
                       Text(
-                        _getLoadLabel(cognitiveLoad),
+                        "ATTENTION",
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: loadColor.withValues(alpha: 0.7),
                             ),
@@ -118,31 +117,41 @@ class FocusScreen extends StatelessWidget {
     return HyperfocusColors.unnecessary; // Red
   }
 
-  String _getLoadLabel(double load) {
-    if (load < 0.4) return "Clear";
-    if (load < 0.7) return "Moderate";
-    if (load < 0.9) return "High";
-    return "Overloaded";
-  }
-
   Widget _buildTaskCard(BuildContext context) {
+    final provider = context.watch<FocusProvider>();
+    final recommendedTask = provider.nextRecommendedTask;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: HyperfocusColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.05),
+          width: recommendedTask != null ? 2 : 1,
+        ),
+        boxShadow: recommendedTask != null
+            ? [
+                BoxShadow(
+                  color: HyperfocusColors.purposeful.withValues(alpha: 0.2),
+                  blurRadius: 15,
+                  spreadRadius: 3,
+                ),
+              ]
+            : [],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.star, color: HyperfocusColors.purposeful, size: 20),
+              Icon(Icons.auto_awesome,
+                  color: HyperfocusColors.purposeful,
+                  size: 20),
               const SizedBox(width: 8),
               Text(
-                "NEXT PURPOSEFUL TASK",
+                "AI-RECOMMENDED",
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: HyperfocusColors.purposeful,
                       fontWeight: FontWeight.bold,
@@ -151,21 +160,23 @@ class FocusScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
-            "Complete UI Implementation Plan",
+            recommendedTask?.title ?? "No tasks available",
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   height: 1.3,
                 ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            "Create detailed plan for Focus, Capture, and Review screens.",
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: HyperfocusColors.textSecondary,
-                ),
-          ),
+          if (recommendedTask != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              recommendedTask!.title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: HyperfocusColors.textSecondary,
+                  ),
+            ),
+          ],
         ],
       ),
     ).animate().fadeIn().slideY(begin: 0.1, end: 0, duration: 500.ms);
@@ -215,8 +226,7 @@ class FocusScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         ),
         child: Text(
           isFocusing ? "STOP SESSION" : "START HYPERFOCUS",
@@ -237,13 +247,21 @@ class FocusScreen extends StatelessWidget {
         .then()
         .boxShadow(
           begin: BoxShadow(
-              color: HyperfocusColors.purposeful.withValues(alpha: 0.2),
+              color: (isFocusing
+                      ? HyperfocusColors.unnecessary
+                      : HyperfocusColors.purposeful)
+                .withValues(alpha: 0.2),
               blurRadius: 10,
-              spreadRadius: 0),
+              spreadRadius: 0,
+            ),
           end: BoxShadow(
-              color: HyperfocusColors.purposeful.withValues(alpha: 0.8),
+              color: (isFocusing
+                      ? HyperfocusColors.unnecessary
+                      : HyperfocusColors.purposeful)
+                .withValues(alpha: 0.8),
               blurRadius: 35,
-              spreadRadius: 8),
+              spreadRadius: 8,
+          ),
           duration: 2000.ms,
         );
   }
@@ -254,4 +272,3 @@ class FocusScreen extends StatelessWidget {
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
-}
