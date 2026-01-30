@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:productivity_app/utils/theme.dart';
+import 'package:productivity_app/screens/achievements_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -389,6 +390,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Export coming soon')),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _buildActionRow(
+            "Achievements",
+            "View your badges and milestones",
+            Icons.emoji_events,
+            () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const AchievementsScreen(),
+                ),
               );
             },
           ),

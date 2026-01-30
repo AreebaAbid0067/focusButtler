@@ -47,11 +47,11 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 ),
               ],
             ),
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white, size: 20),
-                const SizedBox(width: 12),
-                const Text(
+                SizedBox(width: 12),
+                Text(
                   'Captured to Brain Dump',
                   style: TextStyle(color: Colors.white, fontSize: 14),
                 ),
@@ -235,7 +235,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
         ),
         child: _isListening
             ? _buildSoundWave()
-            : Icon(Icons.mic_none, size: 64, color: Colors.white),
+            : const Icon(Icons.mic_none, size: 64, color: Colors.white),
       ),
     ).animate().scale(delay: 100.ms).fadeIn();
   }

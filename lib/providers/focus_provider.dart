@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:productivity_app/models/task.dart';
+import 'package:productivity_app/models/achievement.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum FocusMode { hyperfocus, scatterfocus }
@@ -18,8 +19,13 @@ class FocusProvider with ChangeNotifier {
   // Statistics
   int _totalSessions = 0;
   int _totalFocusMinutes = 0;
+  int _totalPurposefulTasks = 0;
   int _currentStreak = 0;
   DateTime? _lastSessionDate;
+
+  // Achievements
+  List<Achievement> _achievements = [];
+  List<String> _newlyUnlockedAchievements = [];
 
   // Persistence
   late SharedPreferences _prefs;
@@ -47,9 +53,18 @@ class FocusProvider with ChangeNotifier {
   // Statistics getters
   int get totalSessions => _totalSessions;
   int get totalFocusMinutes => _totalFocusMinutes;
+  int get totalPurposefulTasks => _totalPurposefulTasks;
   int get currentStreak => _currentStreak;
 
   List<Task> get tasks => _tasks;
+  List<Achievement> get achievements => _achievements;
+  List<String> get newlyUnlockedAchievements => _newlyUnlockedAchievements;
+
+  int get unlockedAchievementCount =>
+      _achievements.where((a) => a.isUnlocked).length;
+
+  double get achievementProgress =>
+      unlockedAchievementCount / _achievements.length;
 
   Task? get nextPurposefulTask =>
       _tasks.firstWhere((t) => t.type == TaskType.purposeful && !t.isCompleted,
@@ -80,17 +95,86 @@ class FocusProvider with ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _loadStatistics();
     _loadTasks();
+    _loadAchievements();
     _calculateStreak();
   }
 
   Future<void> _loadStatistics() async {
     _totalSessions = _prefs.getInt('totalSessions') ?? 0;
     _totalFocusMinutes = _prefs.getInt('totalFocusMinutes') ?? 0;
+    _totalPurposefulTasks = _prefs.getInt('totalPurposefulTasks') ?? 0;
     _currentStreak = _prefs.getInt('currentStreak') ?? 0;
     final lastDate = _prefs.getString('lastSessionDate');
     if (lastDate != null) {
       _lastSessionDate = DateTime.parse(lastDate);
     }
+    notifyListeners();
+  }
+
+  Future<void> _loadAchievements() async {
+    final achievementsJson = _prefs.getString('achievements');
+    if (achievementsJson != null) {
+      final List<dynamic> achievementsList = json.decode(achievementsJson);
+      _achievements = achievementsList
+          .map((a) => Achievement.fromJson(a))
+          .toList();
+    } else {
+      _achievements = getDefaultAchievements();
+    }
+    _updateAchievementProgress();
+  }
+
+  void _updateAchievementProgress() {
+    _newlyUnlockedAchievements.clear();
+
+    for (var achievement in _achievements) {
+      switch (achievement.id) {
+        case 'streak_3':
+          achievement.currentValue = _totalSessions;
+          break;
+        case 'streak_7':
+        case 'streak_30':
+        case 'streak_100':
+          achievement.currentValue = _currentStreak;
+          break;
+        case 'focus_hours_1':
+        case 'focus_hours_10':
+        case 'focus_hours_50':
+          achievement.currentValue = _totalFocusMinutes;
+          break;
+        case 'tasks_10':
+        case 'tasks_50':
+        case 'tasks_100':
+          achievement.currentValue = _totalPurposefulTasks;
+          break;
+        case 'first_session':
+        case 'sessions_25':
+        case 'sessions_100':
+          achievement.currentValue = _totalSessions;
+          break;
+      }
+    }
+  }
+
+  void _checkAchievements() {
+    _newlyUnlockedAchievements.clear();
+
+    for (var achievement in _achievements) {
+      if (!achievement.isUnlocked && achievement.currentValue >= achievement.targetValue) {
+        achievement.isUnlocked = true;
+        achievement.unlockedAt = DateTime.now();
+        _newlyUnlockedAchievements.add(achievement.id);
+      }
+    }
+
+    if (_newlyUnlockedAchievements.isNotEmpty) {
+      _saveAchievements();
+    }
+  }
+
+  Future<void> _saveAchievements() async {
+    final achievementsJson = json.encode(_achievements.map((a) => a.toJson()).toList());
+    await _prefs.setString('achievements', achievementsJson);
     notifyListeners();
   }
 
@@ -145,7 +229,8 @@ class FocusProvider with ChangeNotifier {
     await _prefs.setInt('totalFocusMinutes', _totalFocusMinutes);
     await _prefs.setInt('currentStreak', _currentStreak);
     if (_lastSessionDate != null) {
-      await _prefs.setString('lastSessionDate', _lastSessionDate!.toIso8601String());
+      await _prefs.setString(
+          'lastSessionDate', _lastSessionDate!.toIso8601String());
     }
   }
 
@@ -154,9 +239,9 @@ class FocusProvider with ChangeNotifier {
     await _prefs.setString('tasks', tasksJson);
   }
 
-  void _triggerHaptic(HapticFeedbackType type) {
+  void _triggerHaptic(Future<void> Function() feedbackMethod) {
     if (hapticsEnabled) {
-      HapticFeedback.vibrate();
+      feedbackMethod();
     }
   }
 
@@ -172,7 +257,7 @@ class FocusProvider with ChangeNotifier {
     _remainingTime = duration;
 
     notifyListeners();
-    _triggerHaptic(HapticFeedbackType.mediumImpact);
+    _triggerHaptic(HapticFeedback.mediumImpact);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
@@ -207,7 +292,12 @@ class FocusProvider with ChangeNotifier {
     }
 
     _saveStatistics();
-    _triggerHaptic(HapticFeedbackType.heavyImpact);
+
+    // Update and check achievements
+    _updateAchievementProgress();
+    _checkAchievements();
+
+    _triggerHaptic(HapticFeedback.heavyImpact);
 
     _remainingTime = Duration(minutes: hyperfocusDuration);
     notifyListeners();
@@ -219,7 +309,7 @@ class FocusProvider with ChangeNotifier {
     _timer?.cancel();
     _isFocusing = false;
     _remainingTime = Duration(minutes: hyperfocusDuration);
-    _triggerHaptic(HapticFeedbackType.lightImpact);
+    _triggerHaptic(HapticFeedback.lightImpact);
     notifyListeners();
   }
 
@@ -253,9 +343,20 @@ class FocusProvider with ChangeNotifier {
   void completeTask(String id) {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
+      // Track purposeful tasks completed
+      if (_tasks[index].type == TaskType.purposeful && !_tasks[index].isCompleted) {
+        _totalPurposefulTasks++;
+        _prefs.setInt('totalPurposefulTasks', _totalPurposefulTasks);
+      }
+
       _tasks[index].isCompleted = true;
       _saveTasks();
-      _triggerHaptic(HapticFeedbackType.mediumImpact);
+      _triggerHaptic(HapticFeedback.mediumImpact);
+
+      // Update and check achievements
+      _updateAchievementProgress();
+      _checkAchievements();
+
       notifyListeners();
     }
   }
@@ -295,20 +396,4 @@ class FocusProvider with ChangeNotifier {
     _timer?.cancel();
     super.dispose();
   }
-}
-
-extension on Task {
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'type': type.index,
-        'isCompleted': isCompleted,
-      };
-
-  factory Task.fromJson(Map<String, dynamic> json) => Task(
-        id: json['id'],
-        title: json['title'],
-        type: TaskType.values[json['type']],
-        isCompleted: json['isCompleted'],
-      );
 }
