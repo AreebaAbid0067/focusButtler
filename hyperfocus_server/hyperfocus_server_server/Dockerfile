@@ -22,12 +22,8 @@ COPY --from=build /runtime/ /
 # Copy compiled server executable
 COPY --from=build /app/bin/server server
 
-# Copy configuration files and resources
-COPY --from=build /app/config/ config/
-COPY --from=build /app/web/ web/
-COPY --from=build /app/migrations/ migrations/
-
-# This file is required to enable the endpoint log filter in Insights.
+# Copy resources if they exist
+# Note: we skip config, web, and migrations for the mini template if they are not present
 COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
 
 # Expose ports

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:serverpod/serverpod.dart';
 import 'package:http/http.dart' as http;
 import '../generated/protocol.dart';
@@ -12,7 +14,8 @@ final _uuid = Uuid();
 /// Endpoint for proxying AI agent requests to Agno AgentOS
 class AgentEndpoint extends Endpoint {
   // URL of the Agno AgentOS server
-  static const String _agnoUrl = 'http://localhost:7777';
+  static final String _agnoUrl =
+      Platform.environment['AGNO_URL'] ?? 'http://localhost:7777';
 
   /// Get AI task categorization from the agent
   Future<TaskType> categorizeTask(Session session, String taskTitle) async {
