@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:productivity_app/utils/theme.dart';
 import 'package:productivity_app/widgets/focus_ritual_sheet.dart';
@@ -127,7 +128,7 @@ class FocusScreen extends StatelessWidget {
   Widget _buildTaskCard(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: HyperfocusColors.surface,
         borderRadius: BorderRadius.circular(24),
@@ -138,7 +139,7 @@ class FocusScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.star, color: HyperfocusColors.purposeful, size: 20),
+              const Icon(Icons.star, color: HyperfocusColors.purposeful, size: 20),
               const SizedBox(width: 8),
               Text(
                 "NEXT PURPOSEFUL TASK",
@@ -171,17 +172,26 @@ class FocusScreen extends StatelessWidget {
   }
 
   Widget _buildStartButton(BuildContext context) {
+    final isFocusing = context.select<FocusProvider, bool>(
+      (p) => p.isFocusing,
+    );
+
     return Container(
       width: double.infinity,
       height: 64,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [HyperfocusColors.purposeful, Color(0xFF00C853)],
+        gradient: LinearGradient(
+          colors: isFocusing
+              ? [HyperfocusColors.unnecessary, const Color(0xFFFF5252)]
+              : [HyperfocusColors.purposeful, const Color(0xFF00C853)],
         ),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: HyperfocusColors.purposeful.withValues(alpha: 0.4),
+            color: (isFocusing
+                    ? HyperfocusColors.unnecessary
+                    : HyperfocusColors.purposeful)
+                .withValues(alpha: 0.4),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -189,9 +199,11 @@ class FocusScreen extends StatelessWidget {
       ),
       child: ElevatedButton(
         onPressed: () {
-          if (context.read<FocusProvider>().isFocusing) {
+          if (isFocusing) {
+            HapticFeedback.mediumImpact();
             context.read<FocusProvider>().stopFocusSession();
           } else {
+            HapticFeedback.mediumImpact();
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -207,11 +219,9 @@ class FocusScreen extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         ),
         child: Text(
-          context.watch<FocusProvider>().isFocusing
-              ? "STOP SESSION"
-              : "START HYPERFOCUS",
+          isFocusing ? "STOP SESSION" : "START HYPERFOCUS",
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.black, // Dark text on bright button for contrast
+                color: Colors.black,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
               ),
@@ -221,9 +231,9 @@ class FocusScreen extends StatelessWidget {
         .animate(onPlay: (controller) => controller.repeat(reverse: true))
         .scaleXY(
             begin: 1.0,
-            end: 1.05,
+            end: isFocusing ? 1.02 : 1.05,
             duration: 2000.ms,
-            curve: Curves.easeInOut) // Breathing effect
+            curve: Curves.easeInOut)
         .then()
         .boxShadow(
           begin: BoxShadow(
@@ -231,10 +241,9 @@ class FocusScreen extends StatelessWidget {
               blurRadius: 10,
               spreadRadius: 0),
           end: BoxShadow(
-              color: HyperfocusColors.purposeful
-                  .withValues(alpha: 0.8), // Enhanced Glow
-              blurRadius: 35, // Wider blur
-              spreadRadius: 8), // Wider spread
+              color: HyperfocusColors.purposeful.withValues(alpha: 0.8),
+              blurRadius: 35,
+              spreadRadius: 8),
           duration: 2000.ms,
         );
   }
