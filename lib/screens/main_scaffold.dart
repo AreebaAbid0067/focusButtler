@@ -7,6 +7,7 @@ import 'package:productivity_app/utils/theme.dart';
 import 'package:productivity_app/screens/settings_screen.dart';
 import 'package:productivity_app/providers/focus_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:hyperfocus_server_client/hyperfocus_server_client.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -76,7 +77,8 @@ class _MainScaffoldState extends State<MainScaffold> {
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _getEnergyColor(provider.currentEnergyLevel).withValues(alpha: 0.2),
+              color: _getEnergyColor(provider.currentEnergyLevel)
+                  .withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(

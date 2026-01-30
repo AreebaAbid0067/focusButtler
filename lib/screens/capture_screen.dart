@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:productivity_app/utils/theme.dart';
 import 'package:productivity_app/providers/focus_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:hyperfocus_server_client/hyperfocus_server_client.dart';
 
 class CaptureScreen extends StatefulWidget {
   const CaptureScreen({super.key});
@@ -36,7 +37,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
       setState(() {
         _isListening = false;
       });
-      context.read<FocusProvider>().addTask("Simulated Voice Task ${DateTime.now().second}");
+      context
+          .read<FocusProvider>()
+          .addTask("Simulated Voice Task ${DateTime.now().second}");
       _showCaptureNotification();
     });
   }
@@ -78,11 +81,11 @@ class _CaptureScreenState extends State<CaptureScreen> {
               ],
             ),
           )
-          .animate()
-          .fadeIn()
-          .slideY(begin: -0.2, end: 0)
-          .then()
-          .fadeOut(delay: 1500.ms),
+              .animate()
+              .fadeIn()
+              .slideY(begin: -0.2, end: 0)
+              .then()
+              .fadeOut(delay: 1500.ms),
         ),
       ),
     );
@@ -260,11 +263,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 }),
               )
             : const Icon(Icons.mic, size: 64, color: Colors.white),
-      )
-      .animate()
-      .scale(delay: 100.ms)
-      .then()
-      .shimmer(duration: 1000.ms),
+      ).animate().scale(delay: 100.ms).then().shimmer(duration: 1000.ms),
     );
   }
 
@@ -318,36 +317,42 @@ class _CaptureScreenState extends State<CaptureScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              "How are you feeling?",
-              style: TextStyle(
-                color: HyperfocusColors.textSecondary,
-                fontSize: 14,
-              ),
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            "How are you feeling?",
+            style: TextStyle(
+              color: HyperfocusColors.textSecondary,
+              fontSize: 14,
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildEnergyChip(context, provider, EnergyLevel.exhausted, "Exhausted", Icons.battery_1_bar),
-                const SizedBox(width: 8),
-                _buildEnergyChip(context, provider, EnergyLevel.low, "Low", Icons.battery_3_bar),
-                const SizedBox(width: 8),
-                _buildEnergyChip(context, provider, EnergyLevel.moderate, "OK", Icons.battery_5_bar),
-                const SizedBox(width: 8),
-                _buildEnergyChip(context, provider, EnergyLevel.high, "High", Icons.battery_6_bar),
-                const SizedBox(width: 8),
-                _buildEnergyChip(context, provider, EnergyLevel.peak, "Peak", Icons.battery_full),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildEnergyChip(context, provider, EnergyLevel.exhausted,
+                  "Exhausted", Icons.battery_1_bar),
+              const SizedBox(width: 8),
+              _buildEnergyChip(context, provider, EnergyLevel.low, "Low",
+                  Icons.battery_3_bar),
+              const SizedBox(width: 8),
+              _buildEnergyChip(context, provider, EnergyLevel.moderate, "OK",
+                  Icons.battery_5_bar),
+              const SizedBox(width: 8),
+              _buildEnergyChip(context, provider, EnergyLevel.high, "High",
+                  Icons.battery_6_bar),
+              const SizedBox(width: 8),
+              _buildEnergyChip(context, provider, EnergyLevel.peak, "Peak",
+                  Icons.battery_full),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildEnergyChip(BuildContext context, FocusProvider provider, EnergyLevel level, String label, IconData icon) {
+  Widget _buildEnergyChip(BuildContext context, FocusProvider provider,
+      EnergyLevel level, String label, IconData icon) {
     final isSelected = provider.currentEnergyLevel == level;
 
     return GestureDetector(
@@ -359,24 +364,28 @@ class _CaptureScreenState extends State<CaptureScreen> {
         duration: 200.ms,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? _getEnergyColor(level)
-              : Colors.transparent,
+          color: isSelected ? _getEnergyColor(level) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.white.withValues(alpha: 0.3) : Colors.transparent,
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.3)
+                : Colors.transparent,
             width: 1,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? Colors.black : HyperfocusColors.textSecondary, size: 18),
+            Icon(icon,
+                color:
+                    isSelected ? Colors.black : HyperfocusColors.textSecondary,
+                size: 18),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.black : HyperfocusColors.textSecondary,
+                color:
+                    isSelected ? Colors.black : HyperfocusColors.textSecondary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,
               ),
@@ -400,5 +409,5 @@ class _CaptureScreenState extends State<CaptureScreen> {
       case EnergyLevel.peak:
         return const Color(0xFF00E676);
     }
-}
+  }
 }

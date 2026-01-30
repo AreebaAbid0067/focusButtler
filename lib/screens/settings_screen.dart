@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:productivity_app/utils/theme.dart';
 import 'package:productivity_app/providers/focus_provider.dart';
-import 'package:productivity_app/models/task.dart';
-
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {

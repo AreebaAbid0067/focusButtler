@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:productivity_app/utils/theme.dart';
 import 'package:productivity_app/providers/focus_provider.dart';
-import 'package:productivity_app/models/task.dart';
 import 'package:provider/provider.dart';
+import 'package:hyperfocus_server_client/hyperfocus_server_client.dart';
 
 class ReviewScreen extends StatefulWidget {
   const ReviewScreen({super.key});
@@ -395,11 +395,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _getInsightColor(insight.type),
+              color: _getInsightColor(insight.category),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              _getInsightIcon(insight.type),
+              _getInsightIcon(insight.category),
               color: Colors.white,
               size: 20,
             ),
@@ -430,29 +430,33 @@ class _ReviewScreenState extends State<ReviewScreen> {
     ).animate().fadeIn().slideX(begin: 0.1);
   }
 
-  Color _getInsightColor(InsightType type) {
-    switch (type) {
-      case InsightType.productivity:
+  Color _getInsightColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'productivity':
         return HyperfocusColors.purposeful;
-      case InsightType.energy:
+      case 'energy':
         return HyperfocusColors.necessary;
-      case InsightType.attention:
+      case 'attention':
         return HyperfocusColors.distracting;
-      case InsightType.tasks:
+      case 'tasks':
         return HyperfocusColors.unnecessary;
+      default:
+        return HyperfocusColors.purposeful;
     }
   }
 
-  IconData _getInsightIcon(InsightType type) {
-    switch (type) {
-      case InsightType.productivity:
+  IconData _getInsightIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'productivity':
         return Icons.trending_up;
-      case InsightType.energy:
+      case 'energy':
         return Icons.battery_charging_full;
-      case InsightType.attention:
+      case 'attention':
         return Icons.psychology;
-      case InsightType.tasks:
+      case 'tasks':
         return Icons.lightbulb_outline;
+      default:
+        return Icons.auto_awesome;
     }
   }
 
