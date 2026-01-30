@@ -20,6 +20,10 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_svg: ^2.0.0
   collection: ^1.19.1
+  serverpod_flutter: 3.2.3
+  hyperfocus_server_client:
+    path: hyperfocus_server/hyperfocus_server_client
+
 
 dev_dependencies:
   flutter_test:

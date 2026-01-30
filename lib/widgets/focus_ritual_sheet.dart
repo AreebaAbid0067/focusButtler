@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:productivity_app/providers/focus_provider.dart';
 import 'package:productivity_app/utils/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:hyperfocus_server_client/hyperfocus_server_client.dart';
 
 class FocusRitualSheet extends StatefulWidget {
   const FocusRitualSheet({super.key});
