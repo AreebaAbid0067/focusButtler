@@ -151,7 +151,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       case EnergyLevel.high:
         return HyperfocusColors.purposeful;
       case EnergyLevel.peak:
-        return Color(0xFF00E676);
+        return const Color(0xFF00E676);
     }
   }
 

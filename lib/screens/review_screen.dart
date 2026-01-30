@@ -59,7 +59,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
             // Weekly Stats Heatmap
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -68,13 +69,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       children: [
                         Text(
                           "This Week",
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         Text(
                           "${provider.totalSessions} sessions",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: HyperfocusColors.textSecondary,
                             fontSize: 14,
                           ),
@@ -129,23 +131,25 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.psychology,
+                          const Icon(Icons.psychology,
                               color: HyperfocusColors.purposeful, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             "AI Insights",
-                            style:
-                                Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: HyperfocusColors.purposeful,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: HyperfocusColors.purposeful,
+                                ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       ...provider.aiInsights.take(3).map((insight) {
                         return _buildInsightCard(insight, context);
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
@@ -175,6 +179,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     ),
                   ],
                 ),
+              ),
             ),
 
             // Tasks
@@ -286,12 +291,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   child: Text(
                     "${day['sessions']}",
                     style: TextStyle(
-                      color: intensity > 0.5 ? Colors.white : HyperfocusColors.textSecondary,
+                      color: intensity > 0.5
+                          ? Colors.white
+                          : HyperfocusColors.textSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+              ),
             ],
           );
         }).toList(),
@@ -305,9 +313,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   Color _getHeatmapColor(double intensity) {
-    if (intensity < 0.2) return HyperfocusColors.purposeful.withValues(alpha: 0.3);
-    if (intensity < 0.5) return HyperfocusColors.purposeful.withValues(alpha: 0.6);
-    if (intensity < 0.8) return HyperfocusColors.purposeful.withValues(alpha: 1.0);
+    if (intensity < 0.2)
+      return HyperfocusColors.purposeful.withValues(alpha: 0.3);
+    if (intensity < 0.5)
+      return HyperfocusColors.purposeful.withValues(alpha: 0.6);
+    if (intensity < 0.8)
+      return HyperfocusColors.purposeful.withValues(alpha: 1.0);
     return HyperfocusColors.purposeful;
   }
 
@@ -343,6 +354,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               "Day Streak",
               Icons.local_fire_department,
             ),
+          ),
         ],
       ),
     );
@@ -398,10 +410,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                    insight.title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                  insight.title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -412,6 +424,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 ),
               ],
             ),
+          ),
         ],
       ),
     ).animate().fadeIn().slideX(begin: 0.1);
@@ -462,9 +475,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
+          ),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: HyperfocusColors.textSecondary,
               fontSize: 10,
             ),
@@ -475,8 +489,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  Widget _buildStat(BuildContext context, String value, String label,
-      Color color, IconData icon) {
+  Widget _buildStat(
+      BuildContext context, String value, String label, Color color,
+      [IconData icon = Icons.analytics]) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -502,21 +517,22 @@ class _ReviewScreenState extends State<ReviewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                    label,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
+                  label,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  value,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: HyperfocusColors.textSecondary,
                       ),
                 ),
               ],
             ),
+          ),
         ],
       ),
     ).animate().scale(delay: 100.ms).fadeIn();
@@ -542,14 +558,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: HyperfocusColors.surface,
+          color: HyperfocusColors.surface
+              .withValues(alpha: task.isCompleted ? 0.6 : 1.0),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: task.isCompleted
                 ? Colors.transparent
                 : color.withValues(alpha: 0.3),
           ),
-          opacity: task.isCompleted ? 0.6 : 1.0,
         ),
         child: Row(
           children: [
@@ -592,7 +608,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               value: task.isCompleted,
               onChanged: (value) {
                 if (task.isCompleted) {
-                  context.read<FocusProvider>().deleteTask(task.id);
+                  context.read<FocusProvider>().uncompleteTask(task.id);
                 } else {
                   context.read<FocusProvider>().completeTask(task.id);
                 }
@@ -602,7 +618,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
             ),
           ],
         ),
-    ).animate().fadeIn();
+      ).animate().fadeIn(),
+    );
   }
 
   Color _getTaskColor(TaskType type) {
@@ -643,3 +660,4 @@ class _ReviewScreenState extends State<ReviewScreen> {
         return "Unnecessary";
     }
   }
+}

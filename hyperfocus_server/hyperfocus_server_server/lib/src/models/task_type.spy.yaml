@@ -1,0 +1,12 @@
+### Task type classification based on Hyperfocus methodology
+enum: TaskType
+
+values:
+  # Deep work, high concentration required
+  - purposeful
+  # Must be done, moderate focus
+  - necessary
+  # Attractive but low value
+  - distracting
+  # Should be eliminated
+  - unnecessary

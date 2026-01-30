@@ -1,161 +1,87 @@
-# FlutterButtler 🦋
+# HYPERFOCUS
 
 **An AI-Powered Productivity Assistant for Adaptive Work Management**
 
-FlutterButtler is a Flutter mobile application designed to help users manage tasks intelligently by adapting to their natural energy levels and work styles throughout the day. It combines two powerful work modes—**Hyperfocus** and **Scatterfocus**—to optimize productivity while preventing burnout.
+Hyperfocus is a full-stack agentic productivity application designed to help users manage tasks intelligently by adapting to their natural energy levels and work styles throughout the day. It combines the **Hyperfocus** and **Scatterfocus** methodologies with a powerful AI agent system to optimize productivity while preventing burnout.
+
+## 🏗️ Architecture
+
+The application follows a modern three-tier agentic architecture:
+
+1.  **Flutter Client**: A sleek, attention-first UI for task management and focus sessions.
+2.  **Serverpod Backend (Dart)**: A high-performance backend handling data persistence, real-time WebSocket communication, and authentication.
+3.  **Agno AgentOS (Python)**: An intelligent agentic layer powered by **MistralAI**, providing sophisticated task categorization, energy analysis, and personalized productivity coaching.
 
 ## 🎯 Core Features
 
 ### 1. **AI Task Categorization**
-- Automatically categorizes tasks into Hyperfocus (deep work) or Scatterfocus (creative work) modes
-- Analyzes task titles, descriptions, and priority to determine the best category
-- Allows manual override for flexibility
+- Replaced keyword-based logic with true AI understanding via the `TaskCategorizer` agent.
+- Automatically quadrants tasks into: Purposeful, Necessary, Distracting, or Unnecessary.
 
 ### 2. **Energy Level Tracking**
-- Users log their energy levels throughout the day (1-100 scale)
-- System learns energy patterns and identifies peak productivity hours
-- Provides recommendations based on current energy state
+- Intelligent energy pattern analysis via the `EnergyAdvisor` agent.
+- System learns your unique circadian and ultradian rhythms to suggest optimal work windows.
 
 ### 3. **Smart Scheduling**
-- Schedules tasks during optimal energy windows
-- Hard/boring tasks → scheduled during peak energy hours
-- Creative tasks → scheduled at strategic times for idea generation
-- Prevents time-wasting and overload detection
+- Automatically aligns high-effort "Purposeful" tasks with your peak energy hours.
+- Suggests creative "Scatterfocus" sessions when energy naturally dips.
 
-### 4. **Hyperfocus Mode with Intensity Levels**
-- **Intense Mode**: High-performance work for critical tasks (shorter duration)
-- **Normal Mode**: Standard focused work
-- **Relaxed Mode**: Lower-intensity deep work
-- Protects against burnout by preventing excessive intense mode usage
-
-## 📱 App Structure
-
-```
-lib/
-├── main.dart                 # App entry point
-├── models/
-│   ├── task.dart             # Task model with categories
-│   ├── energy_level.dart     # Energy tracking models
-│   └── user_profile.dart     # User profile model
-├── screens/
-│   ├── home_screen.dart      # Main dashboard
-│   └── add_task_screen.dart  # Task creation/editing
-├── services/
-│   ├── ai_task_categorizer.dart  # AI-powered categorization
-│   ├── smart_scheduler.dart      # Intelligent scheduling
-│   ├── energy_tracker.dart       # Energy pattern analysis
-│   └── task_manager.dart         # Core task operations
-├── widgets/
-│   ├── task_card.dart            # Task display component
-│   └── energy_tracker_widget.dart # Energy input component
-└── utils/
-    └── datetime_utils.dart       # Date/time utilities
-```
+### 4. **AI Focus Guardian**
+- Real-time encouragement and distraction management during sessions.
+- Methodology-aware coaching based on Chris Bailey's Hyperfocus framework.
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Flutter SDK (3.0.0 or higher)
-- Dart SDK
-- Android Studio or VS Code with Flutter extensions
+### 1. Prerequisites
+- Flutter SDK & Dart SDK
+- Python 3.11+
+- Serverpod CLI (`dart pub global activate serverpod_cli`)
+- Mistral AI API Key
 
-### Installation
+### 2. Backend Setup (Agno AgentOS)
+```bash
+cd focusbuttler_agents
+cp .env.example .env # Add your MISTRAL_API_KEY
+uv sync
+uv run python main.py
+```
 
-1. **Navigate to the project directory:**
-   ```bash
-   cd productivity_app
-   ```
+### 3. Backend Setup (Serverpod)
+```bash
+cd hyperfocus_server/hyperfocus_server_server
+dart pub get
+dart run bin/main.dart
+```
 
-2. **Get dependencies:**
-   ```bash
-   flutter pub get
-   ```
+### 4. Flutter Client
+```bash
+flutter pub get
+flutter run
+```
 
-3. **Run the app:**
-   ```bash
-   flutter run
-   ```
+## 📦 Tech Stack
 
-## 📦 Dependencies
+- **Frontend**: Flutter, Provider, Flutter Animate
+- **Backend**: Serverpod, PostgreSQL (planned)
+- **AI Agent OS**: Agno, MistralAI (Large/Small)
+- **Persistence**: Serverpod (In-memory for mini mode)
 
-- **uuid**: For generating unique task IDs
-- **provider**: State management (optional for future)
-- **shared_preferences**: Local data persistence
-- **intl**: Internationalization and date formatting
-
-## 🎨 UI/UX Features
-
-- **Bottom Navigation**: Easy access to Home, Energy, and Analytics tabs
-- **Task Cards**: Visual representation with priority, category, and status indicators
-- **Energy Slider**: Intuitive energy level input with color-coded feedback
-- **Dashboard Statistics**: Real-time task completion metrics
-- **Material Design 3**: Modern, responsive UI with dark mode support
+## 🎨 UI/UX Principles
+- **Attention-First Design**: Minimal cognitive load and intentionality.
+- **Visual Clarity**: Color-coded task quadrants and energy sliders.
+- **Real-time Feedback**: Interactive "Attention Meter" and AI insights.
 
 ## 💡 How It Works
 
-### Workflow:
-
-1. **User Creates a Task**
-   - Enter task title, description, and estimated duration
-   - Click "AI Categorize" for automatic categorization
-   - Or manually select Hyperfocus/Scatterfocus mode
-
-2. **System Analyzes Energy Patterns**
-   - Collects energy level logs throughout the day
-   - Identifies peak productivity hours
-   - Builds user-specific energy pattern model
-
-3. **Smart Scheduling**
-   - System suggests best times for each task
-   - High-priority/difficult tasks → scheduled during peak energy
-   - Creative tasks → scheduled for moderate energy windows
-   - Prevents overload and time-wasting behaviors
-
-4. **Task Execution**
-   - User works on tasks during recommended times
-   - Can mark as complete, pause, or resume
-   - System tracks completion metrics
-
-5. **Continuous Learning**
-   - Energy patterns are refined over time
-   - Recommendations improve with more data
-   - Personalization increases with usage
-
-## 🔮 Future Enhancements
-
-- [ ] Backend integration with real AI models
-- [ ] Cloud synchronization across devices
-- [ ] Integration with calendar apps (Google Calendar, Outlook)
-- [ ] Pomodoro timer with hyperfocus modes
-- [ ] Notifications and reminders
-- [ ] Weekly/monthly productivity reports
-- [ ] Social features (leaderboards, challenges)
-- [ ] Customizable themes and preferences
-- [ ] Voice task creation
-- [ ] Machine learning for improved categorization
-
-## 🛠️ Development Notes
-
-### Models
-- **Task**: Represents a work item with category, priority, and scheduling info
-- **EnergyEntry**: Records user energy at specific timestamps
-- **DailyEnergyPattern**: Aggregates energy data by day
-- **UserProfile**: Stores user preferences and goals
-
-### Services
-- **AITaskCategorizer**: Keyword-based categorization (production version would use ML)
-- **SmartScheduler**: Analyzes patterns and prevents overload
-- **EnergyTracker**: Manages energy logging and pattern analysis
-- **TaskManager**: Core CRUD operations and statistics
+1. **Capture**: Quickly add tasks; the `TaskCategorizer` agent handles the taxonomy.
+2. **Log**: Record energy levels to build your productivity profile.
+3. **Focus**: Start a session with the `FocusGuardian` agent watching over your work.
+4. **Learn**: Receive personalized insights from the `ProductivityCoach` team.
 
 ## 📄 License
 
-This project is part of the FlutterButtler Hackathon 2026 initiative.
-
-## 👥 Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+This project is part of the Hyperfocus Productivity initiative.
 
 ---
 
-**Built with ❤️ for productive humans**
+**Built with ❤️ by Antigravity for productive humans**

@@ -5,6 +5,7 @@ class Task {
   final String title;
   final TaskType type;
   final DateTime createdAt;
+  bool isCompleted;
   DateTime? completedAt;
 
   Task({
@@ -29,7 +30,7 @@ class Task {
         id: json['id'],
         title: json['title'],
         type: TaskType.values[json['type']],
-        isCompleted: json['isCompleted'],
+        isCompleted: json['isCompleted'] ?? false,
         createdAt: json['createdAt'] != null
             ? DateTime.parse(json['createdAt'])
             : DateTime.now(), // Fallback for old tasks

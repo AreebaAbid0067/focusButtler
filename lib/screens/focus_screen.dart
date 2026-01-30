@@ -146,7 +146,7 @@ class FocusScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome,
+              const Icon(Icons.auto_awesome,
                   color: HyperfocusColors.purposeful, size: 20),
               const SizedBox(width: 8),
               Text(
@@ -170,7 +170,7 @@ class FocusScreen extends StatelessWidget {
           if (recommendedTask != null) ...[
             const SizedBox(height: 8),
             Text(
-              recommendedTask!.title,
+              recommendedTask.title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: HyperfocusColors.textSecondary,
                   ),

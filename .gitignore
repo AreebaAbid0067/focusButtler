@@ -43,3 +43,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Python / Agno AgentOS
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+**/.env
+**/*.db
+**/.agno/
+
+# Serverpod
+**/config/passwords.yaml
+**/*.spy.yaml.lock
+**/generated/
+

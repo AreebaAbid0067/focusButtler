@@ -64,10 +64,10 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 ),
               ],
             ),
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white, size: 20),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Text(
                   'Captured to Brain Dump',
                   style: TextStyle(
@@ -259,12 +259,12 @@ class _CaptureScreenState extends State<CaptureScreen> {
                   );
                 }),
               )
-            : Icon(Icons.mic, size: 64, color: Colors.white),
+            : const Icon(Icons.mic, size: 64, color: Colors.white),
       )
       .animate()
       .scale(delay: 100.ms)
       .then()
-      .glow(duration: 1000.ms, iterations: 2),
+      .shimmer(duration: 1000.ms),
     );
   }
 
@@ -316,10 +316,11 @@ class _CaptureScreenState extends State<CaptureScreen> {
       decoration: BoxDecoration(
         color: HyperfocusColors.surfaceHighlight.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
-        child: Column(
+      ),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "How are you feeling?",
               style: TextStyle(
                 color: HyperfocusColors.textSecondary,
@@ -399,4 +400,5 @@ class _CaptureScreenState extends State<CaptureScreen> {
       case EnergyLevel.peak:
         return const Color(0xFF00E676);
     }
+}
 }

@@ -1,0 +1,15 @@
+### An energy entry logged by the user
+class: EnergyEntry
+
+fields:
+  ### Unique identifier
+  id: String
+  
+  ### The energy level logged
+  level: EnergyLevel
+  
+  ### When this energy level was recorded
+  timestamp: DateTime
+  
+  ### Hour of day (0-23) for pattern analysis
+  hourOfDay: int

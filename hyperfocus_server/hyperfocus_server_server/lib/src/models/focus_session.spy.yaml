@@ -1,0 +1,27 @@
+### A focus session record
+class: FocusSession
+
+fields:
+  ### Unique identifier
+  id: String
+  
+  ### The focus mode used in this session
+  mode: FocusMode
+  
+  ### When the session started
+  startTime: DateTime
+  
+  ### When the session ended (null if ongoing)
+  endTime: DateTime?
+  
+  ### Target duration in minutes
+  targetDurationMinutes: int
+  
+  ### Whether the session was completed successfully
+  wasCompleted: bool
+  
+  ### Number of distractions logged during session
+  distractionCount: int
+  
+  ### Task being worked on (optional)
+  taskId: String?
