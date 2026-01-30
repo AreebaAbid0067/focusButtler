@@ -1,0 +1,35 @@
+# Build stage
+FROM dart:3.8.0 AS build
+WORKDIR /app
+COPY . .
+
+# Install dependencies and compile the server executable
+RUN dart pub get
+RUN dart compile exe bin/main.dart -o bin/server
+
+# Final stage
+FROM alpine:latest
+
+# Environment variables
+ENV runmode=production
+ENV serverid=default
+ENV logging=normal
+ENV role=monolith
+
+# Copy runtime dependencies
+COPY --from=build /runtime/ /
+
+# Copy compiled server executable
+COPY --from=build /app/bin/server server
+
+# Copy resources if they exist
+# Note: we skip config, web, and migrations for the mini template if they are not present
+COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
+
+# Expose ports
+EXPOSE 8080
+EXPOSE 8081
+EXPOSE 8082
+
+# Define the entrypoint command
+ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role

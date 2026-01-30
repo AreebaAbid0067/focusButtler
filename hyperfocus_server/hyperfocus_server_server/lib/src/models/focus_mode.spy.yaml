@@ -1,0 +1,8 @@
+### Focus mode types
+enum: FocusMode
+
+values:
+  # Deep work mode - Hyperfocus
+  - hyperfocus
+  # Creative recovery mode - Scatterfocus
+  - scatterfocus

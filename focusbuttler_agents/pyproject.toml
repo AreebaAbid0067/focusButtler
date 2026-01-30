@@ -1,0 +1,20 @@
+[project]
+name = "focusbuttler-agents"
+version = "0.1.0"
+description = "Agno AI agents for the Hyperfocus productivity app"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "agno>=2.0.0",
+    "mistralai>=1.2.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "python-dotenv>=1.0.0",
+    "pgvector>=0.3.0",
+    "psycopg2-binary>=2.9.0",
+    "sqlalchemy>=2.0.0",
+    "pypdf>=5.0.0",
+]
+
+[project.scripts]
+start = "uvicorn main:app --host 0.0.0.0 --port 7777"

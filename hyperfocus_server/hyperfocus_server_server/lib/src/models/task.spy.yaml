@@ -1,0 +1,24 @@
+### A task in the Hyperfocus productivity system
+class: Task
+
+fields:
+  ### Unique identifier
+  id: String
+  
+  ### Title of the task
+  title: String
+  
+  ### Type classification (purposeful, necessary, distracting, unnecessary)
+  type: TaskType
+  
+  ### Whether the task has been completed
+  isCompleted: bool
+  
+  ### When the task was created
+  createdAt: DateTime
+  
+  ### When the task was completed (null if not completed)
+  completedAt: DateTime?
+  
+  ### AI-recommended optimal time to work on this task
+  aiRecommendedTime: DateTime?

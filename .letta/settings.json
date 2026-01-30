@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p ~/.letta/agents/agent-3a3bec39-2c0a-4d20-b318-459f0fc8f371/memory/system/human/prefs ~/.letta/agents/agent-3a3bec39-2c0a-4d20-b318-459f0fc8f371/memory/system/persona/behavior ~/.letta/agents/agent-3a3bec39-2c0a-4d20-b318-459f0fc8f371/memory/system/project/architecture ~/.letta/agents/agent-3a3bec39-2c0a-4d20-b318-459f0fc8f371/memory/system/project/features ~/.letta/agents/agent-3a3bec39-2c0a-4d20-b318-459f0fc8f371/memory/system/project/tooling)",
+      "Write(**)",
+      "Bash(find:*)",
+      "Edit(lib/screens/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Read(lib/screens/**)",
+      "Bash(mkdir -p /home/ab916/src/focusButtler/assets)",
+      "Bash(cp /home/ab916/src/focusButtler/hyperfocus-logo.svg /home/ab916/src/focusButtler/assets/)",
+      "Edit(**)",
+      "Bash(git reset:*)",
+      "Bash(git push:*)",
+      "Edit(//home/ab916/.letta/agents/agent-3a3bec39-2c0a-4d20-b318-459f0fc8f371/memory/system/**)",
+      "Bash(flutter analyze)"
+    ]
+  }
+}

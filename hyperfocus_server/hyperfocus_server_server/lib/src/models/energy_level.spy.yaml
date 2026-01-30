@@ -1,0 +1,14 @@
+### Energy level classifications
+enum: EnergyLevel
+
+values:
+  # Exhausted - 20% multiplier
+  - exhausted
+  # Low energy - 40% multiplier
+  - low
+  # Moderate/OK energy - 60% multiplier
+  - moderate
+  # High energy - 80% multiplier
+  - high
+  # Peak energy - 100% multiplier
+  - peak
