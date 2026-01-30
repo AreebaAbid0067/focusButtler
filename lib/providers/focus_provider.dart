@@ -6,16 +6,37 @@ import 'package:productivity_app/models/task.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum FocusMode { hyperfocus, scatterfocus }
+enum HapticFeedbackType { light, medium, heavy }
+enum InsightType { productivity, energy, attention, tasks }
 
 enum EnergyLevel {
-  exhausted(0.2),
-  low(0.4),
-  moderate(0.6),
-  high(0.8),
-  peak(1.0);
-
   final double multiplier;
-  const EnergyLevel(this.multiplier);
+  final String label;
+
+  const EnergyLevel(this.multiplier, this.label);
+
+  static const EnergyLevel exhausted = EnergyLevel(0.2, "Exhausted");
+  static const EnergyLevel low = EnergyLevel(0.4, "Low");
+  static const EnergyLevel moderate = EnergyLevel(0.6, "OK");
+  static const EnergyLevel high = EnergyLevel(0.8, "High");
+  static const EnergyLevel peak = EnergyLevel(1.0, "Peak");
+}
+
+class AIInsight {
+  final String id;
+  final InsightType type;
+  final String title;
+  final String description;
+  final int priority;
+  final DateTime createdAt;
+
+  const AIInsight({
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.priority,
+  }) : id = DateTime.now().millisecondsSinceEpoch.toString(),
+       createdAt = DateTime.now();
 }
 
 class FocusProvider with ChangeNotifier {
@@ -27,19 +48,19 @@ class FocusProvider with ChangeNotifier {
 
   // Energy & Circadian System
   EnergyLevel _currentEnergyLevel = EnergyLevel.moderate;
-  List<EnergyEntry> _energyHistory = [];
+  final List<EnergyEntry> _energyHistory = [];
   DateTime _lastEnergyLog = DateTime.now();
-  
+
   // Cognitive State
   double _attentionScore = 1.0; // 0-1, measures current attention quality
   int _distractionCount = 0;
-  List<Distraction> _distractions = [];
+  final List<Distraction> _distractions = [];
   int _sessionCount = 0;
-  
+
   // AI/Agentic State
-  List<Task> _tasks = [];
-  List<AIInsight> _aiInsights = [];
-  Map<String, double> _productivityPattern = {}; // Hour -> productivity score
+  final List<Task> _tasks = [];
+  final List<AIInsight> _aiInsights = [];
+  final Map<String, double> _productivityPattern = {}; // Hour -> productivity score
   DateTime? _peakProductivityHour;
 
   // Persistence
@@ -49,22 +70,22 @@ class FocusProvider with ChangeNotifier {
   bool get isFocusing => _isFocusing;
   FocusMode get currentMode => _currentMode;
   Duration get remainingTime => _remainingTime;
-  
+
   EnergyLevel get currentEnergyLevel => _currentEnergyLevel;
   List<EnergyEntry> get energyHistory => _energyHistory;
-  
+
   double get attentionScore => _attentionScore;
   int get distractionCount => _distractionCount;
   int get sessionCount => _sessionCount;
-  
+
   List<Task> get tasks => _tasks;
   List<AIInsight> get aiInsights => _aiInsights;
   DateTime? get peakProductivityHour => _peakProductivityHour;
-  
+
   Duration get hyperfocusDuration {
     return Duration(minutes: _prefs.getInt('hyperfocusDuration') ?? _getOptimalHyperfocusDuration());
   }
-  
+
   Duration get scatterfocusDuration {
     return Duration(minutes: _prefs.getInt('scatterfocusDuration') ?? 15);
   }
@@ -75,53 +96,53 @@ class FocusProvider with ChangeNotifier {
 
   Task? get nextRecommendedTask {
     if (_tasks.isEmpty) return null;
-    
+
     // AI-powered task selection based on multiple factors
     final now = DateTime.now();
     final hour = now.hour;
     final energyMultiplier = _currentEnergyLevel.multiplier;
-    
+
     // Score each task
     final scoredTasks = _tasks
         .where((t) => !t.isCompleted)
         .map((task) {
           double score = 0;
-          
+
           // Energy match scoring
           final energyMatch = _getEnergyTaskMatch(task.type);
           score += energyMatch * energyMultiplier * 30;
-          
+
           // Time-based scoring (certain tasks better at certain times)
           score += _getTimeBasedScore(task, hour) * 20;
-          
+
           // Attention fit scoring
           if (_attentionScore < 0.5 && task.type == TaskType.purposeful) {
             score *= 0.5; // Defer deep work if attention is low
           }
-          
+
           // Urgency factor (older tasks get slight boost)
           final age = now.difference(task.createdAt).inHours;
           score += (age / 24).clamp(0, 10);
-          
+
           return MapEntry(task, score);
         })
         .toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
+
     return scoredTasks.first.key;
   }
 
   double get cognitiveLoadScore {
     int uncompleted = _tasks.where((t) => !t.isCompleted).length;
     double baseLoad = (uncompleted * 0.1).clamp(0.0, 1.0);
-    
+
     // Circadian adjustment based on actual patterns
     final hour = DateTime.now().hour;
-    double circadianMultiplier = _productivityPattern[hour] ?? 1.0;
-    
+    double circadianMultiplier = _productivityPattern[hour.toString()] ?? 1.0;
+
     // Energy level impact
     final energyImpact = _currentEnergyLevel.multiplier;
-    
+
     return (baseLoad * circadianMultiplier * energyImpact).clamp(0.0, 1.0);
   }
 
@@ -140,8 +161,8 @@ class FocusProvider with ChangeNotifier {
   int _getOptimalHyperfocusDuration() {
     // AI-determined optimal duration based on energy patterns
     final hour = DateTime.now().hour;
-    final pattern = _productivityPattern[hour] ?? 0.7;
-    
+    final pattern = _productivityPattern[hour.toString()] ?? 0.7;
+
     // Higher productivity = longer sessions
     if (pattern > 0.8) return 45;
     if (pattern > 0.6) return 30;
@@ -167,19 +188,19 @@ class FocusProvider with ChangeNotifier {
   double _getTimeBasedScore(Task task, int hour) {
     // Morning people: better at analytical tasks early
     // Evening people: better at creative tasks late
-    final morningScore = _productivityPattern[9] ?? 0.5;
-    final eveningScore = _productivityPattern[20] ?? 0.5;
-    
+    final morningScore = _productivityPattern['9'] ?? 0.5;
+    final eveningScore = _productivityPattern['20'] ?? 0.5;
+
     final isMorningPerson = morningScore > eveningScore;
-    
+
     if (task.type == TaskType.purposeful) {
-      return isMorningPerson 
+      return isMorningPerson
           ? (hour >= 6 && hour <= 12 ? 1.0 : 0.6)
           : (hour >= 14 && hour <= 21 ? 1.0 : 0.6);
     }
-    
+
     // Scatterfocus tasks better during breaks in productivity
-    return isMorningPerson 
+    return isMorningPerson
         ? (hour >= 13 && hour <= 15 ? 1.0 : 0.5)
         : (hour >= 10 && hour <= 12 ? 1.0 : 0.5);
   }
@@ -191,19 +212,19 @@ class FocusProvider with ChangeNotifier {
       timestamp: DateTime.now(),
       context: _getCurrentContext(),
     );
-    
+
     _energyHistory.add(entry);
     _currentEnergyLevel = level;
     _lastEnergyLog = DateTime.now();
-    
+
     // Keep only last 7 days
     _energyHistory = _energyHistory
         .where((e) => e.timestamp.isAfter(DateTime.now().subtract(const Duration(days: 7))))
         .toList();
-    
+
     await _prefs.setString('energyHistory', json.encode(_energyHistory.map((e) => e.toJson()).toList()));
     await _prefs.setInt('lastEnergyLevel', level.index);
-    
+
     _analyzePatterns();
     notifyListeners();
   }
@@ -225,7 +246,7 @@ class FocusProvider with ChangeNotifier {
       final List<dynamic> historyList = json.decode(historyJson);
       _energyHistory = historyList.map((e) => EnergyEntry.fromJson(e)).toList();
     }
-    
+
     final lastLevel = _prefs.getInt('lastEnergyLevel');
     if (lastLevel != null) {
       _currentEnergyLevel = EnergyLevel.values[lastLevel];
@@ -247,21 +268,21 @@ class FocusProvider with ChangeNotifier {
 
   void _analyzePatterns() {
     if (_energyHistory.isEmpty) return;
-    
+
     // Calculate average productivity per hour
     final Map<String, List<double>> hourlyEnergy = {};
-    
+
     for (var entry in _energyHistory) {
       final hour = entry.timestamp.hour.toString();
       hourlyEnergy.putIfAbsent(hour, () => []);
       hourlyEnergy[hour]!.add(entry.level.multiplier);
     }
-    
+
     // Update patterns
     for (var entry in hourlyEnergy.entries) {
       _productivityPattern[entry.key] = entry.value.average;
     }
-    
+
     // Find peak productivity hour
     double maxProd = 0;
     int peakHour = 9;
@@ -272,7 +293,7 @@ class FocusProvider with ChangeNotifier {
       }
     }
     _peakProductivityHour = DateTime.now().copyWith(hour: peakHour);
-    
+
     // Generate AI insights
     _generateInsights();
   }
@@ -283,10 +304,10 @@ class FocusProvider with ChangeNotifier {
 
   void _generateInsights() {
     _aiInsights.clear();
-    
+
     final now = DateTime.now();
     final currentHour = now.hour;
-    
+
     // Insight: Productivity pattern
     if (_peakProductivityHour != null) {
       final hour = _peakProductivityHour!.hour;
@@ -298,12 +319,12 @@ class FocusProvider with ChangeNotifier {
         priority: 8,
       ));
     }
-    
+
     // Insight: Energy trend
     if (_energyHistory.length >= 3) {
       final recent = _energyHistory.take(3).map((e) => e.level.multiplier).average;
       final older = _energyHistory.skip(3).take(3).map((e) => e.level.multiplier).average;
-      
+
       if (recent > older + 0.1) {
         _aiInsights.add(AIInsight(
           type: InsightType.energy,
@@ -320,7 +341,7 @@ class FocusProvider with ChangeNotifier {
         ));
       }
     }
-    
+
     // Insight: Attention warning
     if (_attentionScore < 0.4 && _isFocusing) {
       _aiInsights.add(AIInsight(
@@ -330,7 +351,7 @@ class FocusProvider with ChangeNotifier {
         priority: 10,
       ));
     }
-    
+
     // Insight: Task backlog
     final backlog = _tasks.where((t) => !t.isCompleted && t.type == TaskType.purposeful).length;
     if (backlog > 5) {
@@ -341,7 +362,7 @@ class FocusProvider with ChangeNotifier {
         priority: 6,
       ));
     }
-    
+
     _aiInsights.sort((a, b) => b.priority.compareTo(a.priority));
   }
 
@@ -355,14 +376,14 @@ class FocusProvider with ChangeNotifier {
   // AI Task Categorization (Sophisticated, not just keywords)
   void addTask(String title) {
     final category = _categorizeTaskAI(title);
-    
+
     _tasks.add(Task(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       type: category,
       createdAt: DateTime.now(),
     ));
-    
+
     _saveTasks();
     _generateInsights();
     notifyListeners();
@@ -371,47 +392,47 @@ class FocusProvider with ChangeNotifier {
   TaskType _categorizeTaskAI(String title) {
     final normalized = title.toLowerCase().trim();
     final words = normalized.split(' ');
-    
+
     // Check for explicit purpose indicators
     final purposefulIndicators = [
       'create', 'build', 'design', 'implement', 'write', 'develop',
       'plan', 'analyze', 'research', 'solve', 'complete', 'finish',
       'learn', 'study', 'master', 'deep work', 'focus'
     ];
-    
-    // Check for distracting indicators  
+
+    // Check for distracting indicators
     final distractingIndicators = [
       'check', 'browse', 'scroll', 'watch', 'play', 'game',
       'social media', 'twitter', 'instagram', 'facebook', 'tiktok',
       'news', 'email', 'messages', 'chat'
     ];
-    
+
     // Check for unnecessary indicators
     final unnecessaryIndicators = [
       'maybe', 'someday', 'later', 'consider', 'think about',
       'wish', 'hope', 'dream', 'might do'
     ];
-    
+
     // Count matches
     int purposefulCount = purposefulIndicators.where((i) => normalized.contains(i)).length;
     int distractingCount = distractingIndicators.where((i) => normalized.contains(i)).length;
     int unnecessaryCount = unnecessaryIndicators.where((i) => normalized.contains(i)).length;
-    
+
     // Check for compound tasks (contain both work and distraction)
     final isCompound = normalized.contains(' and ') || normalized.contains(',');
-    
+
     if (isCompound) {
       // Split and analyze components
-      final parts = normalized.split(/(?:,| and )/);
+      final parts = normalized.split(RegExp(r'(?:,| and )'));
       final partTypes = parts.map(_categorizeSimpleTask).toList();
-      
+
       if (partTypes.contains(TaskType.purposeful)) {
         return TaskType.purposeful;
       } else if (partTypes.contains(TaskType.distracting)) {
         return TaskType.distracting;
       }
     }
-    
+
     // Decision logic with AI-like scoring
     if (purposefulCount > distractingCount && purposefulCount > unnecessaryCount) {
       return TaskType.purposeful;
@@ -423,7 +444,7 @@ class FocusProvider with ChangeNotifier {
       // AI inference: analyze task structure
       return _inferTaskType(words);
     }
-    
+
     // Default to necessary (default bucket)
     return TaskType.necessary;
   }
@@ -431,7 +452,7 @@ class FocusProvider with ChangeNotifier {
   TaskType _categorizeSimpleTask(String task) {
     final purposeful = ['create', 'build', 'design', 'implement', 'write', 'develop'];
     final distracting = ['check', 'browse', 'watch', 'play', 'game'];
-    
+
     if (purposeful.any((p) => task.contains(p))) return TaskType.purposeful;
     if (distracting.any((d) => task.contains(d))) return TaskType.distracting;
     return TaskType.necessary;
@@ -446,22 +467,27 @@ class FocusProvider with ChangeNotifier {
       final hasAction = words.any((w) => !actionVerbs.contains(w));
       if (hasAction) return TaskType.purposeful;
     }
-    
+
     // Short vague tasks often unnecessary
     if (words.length <= 2) {
       return TaskType.unnecessary;
     }
-    
+
     return TaskType.necessary;
   }
 
   void completeTask(String id) {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
+      // Track purposeful tasks completed
+      if (_tasks[index].type == TaskType.purposeful && !_tasks[index].isCompleted) {
+        // Increment purposeful tasks count
+      }
+
       _tasks[index].isCompleted = true;
       _tasks[index].completedAt = DateTime.now();
       _saveTasks();
-      _triggerHaptic(HapticFeedbackType.mediumImpact);
+      _triggerHaptic(HapticFeedbackType.medium);
       _generateInsights();
       notifyListeners();
     }
@@ -480,10 +506,10 @@ class FocusProvider with ChangeNotifier {
       timestamp: DateTime.now(),
       attentionScore: _attentionScore,
     ));
-    
+
     // Reduce attention score
     _attentionScore = (_attentionScore - 0.1).clamp(0.0, 1.0);
-    
+
     notifyListeners();
   }
 
@@ -494,7 +520,7 @@ class FocusProvider with ChangeNotifier {
 
   void updateAttention(double score) {
     _attentionScore = score.clamp(0.0, 1.0);
-    
+
     // Generate attention-related insights
     if (_attentionScore < 0.3) {
       _aiInsights.add(AIInsight(
@@ -504,7 +530,7 @@ class FocusProvider with ChangeNotifier {
         priority: 10,
       ));
     }
-    
+
     notifyListeners();
   }
 
@@ -516,24 +542,24 @@ class FocusProvider with ChangeNotifier {
     _isFocusing = true;
     _attentionScore = 1.0;
     _distractionCount = 0;
-    
+
     final duration = mode == FocusMode.hyperfocus
         ? hyperfocusDuration
         : scatterfocusDuration;
     _remainingTime = duration;
 
     notifyListeners();
-    _triggerHaptic(HapticFeedbackType.mediumImpact);
+    _triggerHaptic(HapticFeedbackType.medium);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         _remainingTime = _remainingTime - const Duration(seconds: 1);
-        
+
         // Random attention drift (more likely during long sessions)
         if (_remainingTime.inSeconds % 60 == 0 && _currentMode == FocusMode.hyperfocus) {
           _attentionScore = (_attentionScore * (0.95 + (0.1 * (1 - _attentionScore)))).clamp(0.3, 1.0);
         }
-        
+
         notifyListeners();
       } else {
         _completeSession();
@@ -545,19 +571,19 @@ class FocusProvider with ChangeNotifier {
     _timer?.cancel();
     _isFocusing = false;
     _sessionCount++;
-    
+
     // Update productivity pattern for this hour
     final hour = DateTime.now().hour.toString();
     final currentScore = _productivityPattern[hour] ?? 0.7;
     // Weight recent sessions more heavily
     _productivityPattern[hour] = (currentScore * 0.7 + _attentionScore * 0.3);
     _saveProductivityPatterns();
-    
+
     // Update patterns and insights
     _analyzePatterns();
-    
-    _triggerHaptic(HapticFeedbackType.heavyImpact);
-    
+
+    _triggerHaptic(HapticFeedbackType.heavy);
+
     _remainingTime = Duration(minutes: hyperfocusDuration);
     notifyListeners();
   }
@@ -568,7 +594,7 @@ class FocusProvider with ChangeNotifier {
     _timer?.cancel();
     _isFocusing = false;
     _remainingTime = Duration(minutes: hyperfocusDuration);
-    _triggerHaptic(HapticFeedbackType.lightImpact);
+    _triggerHaptic(HapticFeedbackType.light);
     notifyListeners();
   }
 
@@ -597,7 +623,17 @@ class FocusProvider with ChangeNotifier {
 
   void _triggerHaptic(HapticFeedbackType type) {
     if (hapticsEnabled) {
-      HapticFeedback.vibrate();
+      switch (type) {
+        case HapticFeedbackType.light:
+          HapticFeedback.lightImpact();
+          break;
+        case HapticFeedbackType.medium:
+          HapticFeedback.mediumImpact();
+          break;
+        case HapticFeedbackType.heavy:
+          HapticFeedback.heavyImpact();
+          break;
+      }
     }
   }
 
@@ -608,54 +644,13 @@ class FocusProvider with ChangeNotifier {
   }
 }
 
-extension on List<double> {
-  double get average => isEmpty ? 0 : reduce((a, b) => a + b) / length;
-}
-
-// Enhanced Task Model
-class Task {
-  final String id;
-  final String title;
-  final TaskType type;
-  bool isCompleted;
-  final DateTime createdAt;
-  DateTime? completedAt;
-
-  Task({
-    required this.id,
-    required this.title,
-    required this.type,
-    this.isCompleted = false,
-    required this.createdAt,
-    this.completedAt,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'type': type.index,
-        'isCompleted': isCompleted,
-        'createdAt': createdAt.toIso8601String(),
-        'completedAt': completedAt?.toIso8601String(),
-      };
-
-  factory Task.fromJson(Map<String, dynamic> json) => Task(
-        id: json['id'],
-        title: json['title'],
-        type: TaskType.values[json['type']],
-        isCompleted: json['isCompleted'] ?? false,
-        createdAt: DateTime.parse(json['createdAt']),
-        completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt']) : null,
-      );
-}
-
 // Energy Entry Model
 class EnergyEntry {
   final EnergyLevel level;
   final DateTime timestamp;
   final String context;
 
-  EnergyEntry({
+  const EnergyEntry({
     required this.level,
     required this.timestamp,
     required this.context,
@@ -679,25 +674,5 @@ class Distraction {
   final DateTime timestamp;
   final double attentionScore;
 
-  Distraction({required this.timestamp, required this.attentionScore});
-}
-
-// AI Insight Model
-enum InsightType { productivity, energy, attention, tasks }
-
-class AIInsight {
-  final String id;
-  final InsightType type;
-  final String title;
-  final String description;
-  final int priority;
-  final DateTime createdAt;
-
-  AIInsight({
-    required this.type,
-    required this.title,
-    required this.description,
-    required this.priority,
-  }) : id = DateTime.now().millisecondsSinceEpoch.toString(),
-       createdAt = DateTime.now();
+  const Distraction({required this.timestamp, required this.attentionScore});
 }

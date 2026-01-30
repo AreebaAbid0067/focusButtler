@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:productivity_app/utils/theme.dart';
-import 'package:productivity_app/screens/achievements_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:productivity_app/providers/focus_provider.dart';
+import 'package:productivity_app/models/task.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -385,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           _buildActionRow(
             "Export Data",
-            "Download your focus history",
+            "Download your focus history and patterns",
             Icons.download,
             () {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -395,14 +396,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           _buildActionRow(
-            "Achievements",
-            "View your badges and milestones",
-            Icons.emoji_events,
+            "Productivity Patterns",
+            "View your energy and attention analytics",
+            Icons.analytics,
             () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AchievementsScreen(),
-                ),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('View your productivity patterns in the Review screen')),
               );
             },
           ),

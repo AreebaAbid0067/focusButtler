@@ -4,13 +4,16 @@ class Task {
   final String id;
   final String title;
   final TaskType type;
-  bool isCompleted;
+  final DateTime createdAt;
+  DateTime? completedAt;
 
   Task({
     required this.id,
     required this.title,
     required this.type,
     this.isCompleted = false,
+    required this.createdAt,
+    this.completedAt,
   });
 
   Map<String, dynamic> toJson() => {
@@ -18,6 +21,8 @@ class Task {
         'title': title,
         'type': type.index,
         'isCompleted': isCompleted,
+        'createdAt': createdAt.toIso8601String(),
+        'completedAt': completedAt?.toIso8601String(),
       };
 
   factory Task.fromJson(Map<String, dynamic> json) => Task(
@@ -25,5 +30,11 @@ class Task {
         title: json['title'],
         type: TaskType.values[json['type']],
         isCompleted: json['isCompleted'],
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(), // Fallback for old tasks
+        completedAt: json['completedAt'] != null
+            ? DateTime.parse(json['completedAt'])
+            : null,
       );
 }

@@ -147,8 +147,7 @@ class FocusScreen extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.auto_awesome,
-                  color: HyperfocusColors.purposeful,
-                  size: 20),
+                  color: HyperfocusColors.purposeful, size: 20),
               const SizedBox(width: 8),
               Text(
                 "AI-RECOMMENDED",
@@ -226,7 +225,8 @@ class FocusScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         ),
         child: Text(
           isFocusing ? "STOP SESSION" : "START HYPERFOCUS",
@@ -247,20 +247,20 @@ class FocusScreen extends StatelessWidget {
         .then()
         .boxShadow(
           begin: BoxShadow(
-              color: (isFocusing
-                      ? HyperfocusColors.unnecessary
-                      : HyperfocusColors.purposeful)
+            color: (isFocusing
+                    ? HyperfocusColors.unnecessary
+                    : HyperfocusColors.purposeful)
                 .withValues(alpha: 0.2),
-              blurRadius: 10,
-              spreadRadius: 0,
-            ),
+            blurRadius: 10,
+            spreadRadius: 0,
+          ),
           end: BoxShadow(
-              color: (isFocusing
-                      ? HyperfocusColors.unnecessary
-                      : HyperfocusColors.purposeful)
+            color: (isFocusing
+                    ? HyperfocusColors.unnecessary
+                    : HyperfocusColors.purposeful)
                 .withValues(alpha: 0.8),
-              blurRadius: 35,
-              spreadRadius: 8,
+            blurRadius: 35,
+            spreadRadius: 8,
           ),
           duration: 2000.ms,
         );
@@ -272,3 +272,4 @@ class FocusScreen extends StatelessWidget {
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
+}

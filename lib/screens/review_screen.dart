@@ -176,6 +176,22 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ],
                 ),
             ),
+
+            // Tasks
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final tasks = provider.tasks;
+                    if (index >= tasks.length) return null;
+                    final task = tasks[index];
+                    return _buildTaskItem(task, context);
+                  },
+                  childCount: provider.tasks.length,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -274,8 +290,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
                 ),
-              ),
             ],
           );
         }).toList(),
@@ -327,7 +343,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
               "Day Streak",
               Icons.local_fire_department,
             ),
-          ),
         ],
       ),
     );
@@ -383,10 +398,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  insight.title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    insight.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -460,37 +475,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  Widget _buildLegend(Color color, String label, String percentage) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: HyperfocusColors.textSecondary,
-            fontSize: 10,
-          ),
-        ),
-        Text(
-          percentage,
-          style: TextStyle(
-            color: HyperfocusColors.textSecondary,
-            fontSize: 10,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuadrantCard(BuildContext context, String title, String subtitle,
+  Widget _buildStat(BuildContext context, String value, String label,
       Color color, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -517,11 +502,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
+                    label,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -535,4 +520,126 @@ class _ReviewScreenState extends State<ReviewScreen> {
         ],
       ),
     ).animate().scale(delay: 100.ms).fadeIn();
+  }
+
+  Widget _buildTaskItem(Task task, BuildContext context) {
+    final color = _getTaskColor(task.type);
+    final icon = _getTaskIcon(task.type);
+
+    return Dismissible(
+      key: Key(task.id),
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: HyperfocusColors.unnecessary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      onDismissed: (direction) {
+        context.read<FocusProvider>().deleteTask(task.id);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: HyperfocusColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: task.isCompleted
+                ? Colors.transparent
+                : color.withValues(alpha: 0.3),
+          ),
+          opacity: task.isCompleted ? 0.6 : 1.0,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.title,
+                    style: TextStyle(
+                      color: task.isCompleted
+                          ? HyperfocusColors.textSecondary
+                          : Colors.white,
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getTaskTypeName(task.type),
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Checkbox(
+              value: task.isCompleted,
+              onChanged: (value) {
+                if (task.isCompleted) {
+                  context.read<FocusProvider>().deleteTask(task.id);
+                } else {
+                  context.read<FocusProvider>().completeTask(task.id);
+                }
+              },
+              activeColor: color,
+              checkColor: Colors.black,
+            ),
+          ],
+        ),
+    ).animate().fadeIn();
+  }
+
+  Color _getTaskColor(TaskType type) {
+    switch (type) {
+      case TaskType.purposeful:
+        return HyperfocusColors.purposeful;
+      case TaskType.necessary:
+        return HyperfocusColors.necessary;
+      case TaskType.distracting:
+        return HyperfocusColors.distracting;
+      case TaskType.unnecessary:
+        return HyperfocusColors.unnecessary;
+    }
+  }
+
+  IconData _getTaskIcon(TaskType type) {
+    switch (type) {
+      case TaskType.purposeful:
+        return Icons.star_outline;
+      case TaskType.necessary:
+        return Icons.check_circle_outline;
+      case TaskType.distracting:
+        return Icons.notifications_none;
+      case TaskType.unnecessary:
+        return Icons.delete_outline;
+    }
+  }
+
+  String _getTaskTypeName(TaskType type) {
+    switch (type) {
+      case TaskType.purposeful:
+        return "Purposeful";
+      case TaskType.necessary:
+        return "Necessary";
+      case TaskType.distracting:
+        return "Distracting";
+      case TaskType.unnecessary:
+        return "Unnecessary";
+    }
   }

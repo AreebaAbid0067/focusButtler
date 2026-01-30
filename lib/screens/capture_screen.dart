@@ -330,15 +330,15 @@ class _CaptureScreenState extends State<CaptureScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildEnergyChip(context, EnergyLevel.exhausted, "Exhausted", Icons.battery_1_bar),
+                _buildEnergyChip(context, provider, EnergyLevel.exhausted, "Exhausted", Icons.battery_1_bar),
                 const SizedBox(width: 8),
-                _buildEnergyChip(context, EnergyLevel.low, "Low", Icons.battery_3_bar),
+                _buildEnergyChip(context, provider, EnergyLevel.low, "Low", Icons.battery_3_bar),
                 const SizedBox(width: 8),
-                _buildEnergyChip(context, EnergyLevel.moderate, "OK", Icons.battery_5_bar),
+                _buildEnergyChip(context, provider, EnergyLevel.moderate, "OK", Icons.battery_5_bar),
                 const SizedBox(width: 8),
-                _buildEnergyChip(context, EnergyLevel.high, "High", Icons.battery_6_bar),
+                _buildEnergyChip(context, provider, EnergyLevel.high, "High", Icons.battery_6_bar),
                 const SizedBox(width: 8),
-                _buildEnergyChip(context, EnergyLevel.peak, "Peak", Icons.battery_full),
+                _buildEnergyChip(context, provider, EnergyLevel.peak, "Peak", Icons.battery_full),
               ],
             ),
           ],
@@ -346,8 +346,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
     );
   }
 
-  Widget _buildEnergyChip(BuildContext context, EnergyLevel level, String label, IconData icon) {
-    final provider = context.watch<FocusProvider>();
+  Widget _buildEnergyChip(BuildContext context, FocusProvider provider, EnergyLevel level, String label, IconData icon) {
     final isSelected = provider.currentEnergyLevel == level;
 
     return GestureDetector(
@@ -380,6 +379,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,
               ),
+            ),
           ],
         ),
       ),
